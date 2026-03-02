@@ -7,10 +7,8 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(urdf_tutorial REQUIRED)
-
-install (
-  DIRECTORY meshes urdf
+install(
+  DIRECTORY launch meshes rviz urdf
   DESTINATION share/${PROJECT_NAME}
 )
 
