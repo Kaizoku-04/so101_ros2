@@ -178,7 +178,8 @@ def generate_launch_description():
     start_gazebo_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
-        launch_arguments=[('gz_args', [' -r -v 4 ', world_path])])
+        launch_arguments=[('gz_args', [' -r -v 4 ', world_path])],
+        condition=IfCondition(use_gazebo))
 
     # Bridge ROS topics and Gazebo messages for establishing communication
     start_gazebo_ros_bridge_cmd = Node(
@@ -187,7 +188,8 @@ def generate_launch_description():
         parameters=[{
             'config_file': default_ros_gz_bridge_config_file_path,
         }],
-        output='screen'
+        output='screen',
+        condition=IfCondition(use_gazebo)
     )
 
     # Includes optimizations to minimize latency and bandwidth when streaming image data
@@ -202,6 +204,7 @@ def generate_launch_description():
             ('/camera_head/depth_image', '/camera_head/depth/image_rect_raw'),
             ('/camera_head/image', '/camera_head/color/image_raw'),
         ],
+        condition=IfCondition(use_camera)
     )
 
     # Spawn the robot
@@ -219,7 +222,8 @@ def generate_launch_description():
             '-R', roll,
             '-P', pitch,
             '-Y', yaw
-        ])
+        ],
+        condition=IfCondition(use_gazebo))
 
     # Create the launch description and populate
     ld = LaunchDescription()
