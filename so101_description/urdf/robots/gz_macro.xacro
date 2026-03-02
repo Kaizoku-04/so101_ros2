@@ -11,5 +11,10 @@
       </material>
     </gazebo>
   </xacro:macro>
-  
+  <xacro:macro name="gazebo_disable_gravity" params="link_name">
+    <gazebo reference="${link_name}">
+      <gravity>false</gravity>
+    </gazebo>
+  </xacro:macro>
+
 </robot>
