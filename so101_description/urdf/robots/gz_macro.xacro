@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"
+       name="gazebo_macro">
+
+  <xacro:macro name="gazebo_light_blue_material" params="link_name">
+    <gazebo reference="${link_name}">
+      <material>
+        <ambient>0.4 0.7 1.0 1</ambient>
+        <diffuse>0.4 0.7 1.0 1</diffuse>
+        <specular>0.2 0.2 0.2 1</specular>
+      </material>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
