@@ -1,3 +1,3 @@
-# mycobot_gazebo #
+# so101_gazebo #
 
 Gazebo simulation support for so-101 robots including worlds and launch files

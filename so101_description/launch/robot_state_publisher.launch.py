@@ -4,7 +4,7 @@ from launch.conditions import IfCondition
 from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-
+from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description() -> LaunchDescription:
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -12,16 +12,16 @@ def generate_launch_description() -> LaunchDescription:
     use_rviz = LaunchConfiguration('use_rviz')
     rviz_config = LaunchConfiguration('rviz_config')
 
-    robot_description = Command([
+    robot_description = ParameterValue(Command([
         'xacro ',
         PathJoinSubstitution([
             FindPackageShare('so101_description'),
             'urdf',
             'robots',
-            'so101.urdf',
+            'so101.urdf.xacro',
         ]),
-    ])
-
+    ]), value_type=str)
+    
     return LaunchDescription([
         DeclareLaunchArgument(
             'use_sim_time',
