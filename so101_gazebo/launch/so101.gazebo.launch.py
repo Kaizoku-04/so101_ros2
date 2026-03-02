@@ -65,6 +65,7 @@ def generate_launch_description():
     use_gazebo = LaunchConfiguration('use_gazebo')
     use_robot_state_pub = LaunchConfiguration('use_robot_state_pub')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    use_joint_state_control = LaunchConfiguration('use_joint_state_control')
     world_file = LaunchConfiguration('world_file')
 
     world_path = PathJoinSubstitution([
@@ -118,6 +119,11 @@ def generate_launch_description():
         default_value='true',
         description='Use simulation (Gazebo) clock if true')
 
+    declare_use_joint_state_control_cmd = DeclareLaunchArgument(
+        name='use_joint_state_control',
+        default_value='true',
+        description='Forward /joint_states commands to Gazebo joint cmd topics')
+
     declare_world_cmd = DeclareLaunchArgument(
         name='world_file',
         default_value=default_world_file,
@@ -169,10 +175,16 @@ def generate_launch_description():
         condition=IfCondition(use_robot_state_pub)
     )
 
-    # Set Gazebo model path
-    set_env_vars_resources = AppendEnvironmentVariable(
+    # Set Gazebo resource paths.
+    # - so101_gazebo/models: world assets referenced with model://...
+    # - parent of so101_description share dir: allows resolving model://so101_description/meshes/...
+    set_env_vars_gazebo_models = AppendEnvironmentVariable(
         'GZ_SIM_RESOURCE_PATH',
         gazebo_models_path)
+
+    set_env_vars_robot_description = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH',
+        os.path.dirname(pkg_share_description))
 
     # Start Gazebo
     start_gazebo_cmd = IncludeLaunchDescription(
@@ -207,6 +219,31 @@ def generate_launch_description():
         condition=IfCondition(use_camera)
     )
 
+    # Bridge joint position command topics from ROS to Gazebo transport
+    start_joint_cmd_bridge_cmd = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/model/so101/joint/shoulder_pan/0/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double',
+            '/model/so101/joint/shoulder_lift/0/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double',
+            '/model/so101/joint/elbow_flex/0/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double',
+            '/model/so101/joint/wrist_flex/0/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double',
+            '/model/so101/joint/wrist_roll/0/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double',
+            '/model/so101/joint/gripper/0/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double',
+        ],
+        output='screen',
+        condition=IfCondition(use_joint_state_control)
+    )
+
+    # Convert joint_state_publisher output to per-joint command topics for Gazebo
+    start_joint_state_to_joint_cmd_cmd = Node(
+        package='so101_gazebo',
+        executable='joint_state_to_joint_cmd.py',
+        output='screen',
+        parameters=[{'robot_name': robot_name}],
+        condition=IfCondition(use_joint_state_control)
+    )
+
     # Spawn the robot
     start_gazebo_ros_spawner_cmd = Node(
         package='ros_gz_sim',
@@ -236,6 +273,7 @@ def generate_launch_description():
     ld.add_action(declare_use_rviz_cmd)
     ld.add_action(declare_use_robot_state_pub_cmd)
     ld.add_action(declare_use_sim_time_cmd)
+    ld.add_action(declare_use_joint_state_control_cmd)
     ld.add_action(declare_world_cmd)
 
     # Add pose arguments
@@ -247,11 +285,14 @@ def generate_launch_description():
     ld.add_action(declare_yaw_cmd)
 
     # Add the actions to the launch description
-    ld.add_action(set_env_vars_resources)
+    ld.add_action(set_env_vars_gazebo_models)
+    ld.add_action(set_env_vars_robot_description)
     ld.add_action(robot_state_publisher_cmd)
     ld.add_action(start_gazebo_cmd)
     ld.add_action(start_gazebo_ros_bridge_cmd)
     ld.add_action(start_gazebo_ros_image_bridge_cmd)
+    ld.add_action(start_joint_cmd_bridge_cmd)
+    ld.add_action(start_joint_state_to_joint_cmd_cmd)
     ld.add_action(start_gazebo_ros_spawner_cmd)
 
     return ld
