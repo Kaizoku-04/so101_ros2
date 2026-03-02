@@ -169,10 +169,16 @@ def generate_launch_description():
         condition=IfCondition(use_robot_state_pub)
     )
 
-    # Set Gazebo model path
-    set_env_vars_resources = AppendEnvironmentVariable(
+    # Set Gazebo resource paths.
+    # - so101_gazebo/models: world assets referenced with model://...
+    # - parent of so101_description share dir: allows resolving model://so101_description/meshes/...
+    set_env_vars_gazebo_models = AppendEnvironmentVariable(
         'GZ_SIM_RESOURCE_PATH',
         gazebo_models_path)
+
+    set_env_vars_robot_description = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH',
+        os.path.dirname(pkg_share_description))
 
     # Start Gazebo
     start_gazebo_cmd = IncludeLaunchDescription(
@@ -247,7 +253,8 @@ def generate_launch_description():
     ld.add_action(declare_yaw_cmd)
 
     # Add the actions to the launch description
-    ld.add_action(set_env_vars_resources)
+    ld.add_action(set_env_vars_gazebo_models)
+    ld.add_action(set_env_vars_robot_description)
     ld.add_action(robot_state_publisher_cmd)
     ld.add_action(start_gazebo_cmd)
     ld.add_action(start_gazebo_ros_bridge_cmd)
