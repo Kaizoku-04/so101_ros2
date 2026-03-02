@@ -479,5 +479,11 @@
   <xacro:gazebo_light_blue_material link_name="gripper_link"/>
   <xacro:gazebo_light_blue_material link_name="moving_jaw_so101_v1_link"/>
 
+  <xacro:gazebo_disable_gravity link_name="shoulder_link"/>
+  <xacro:gazebo_disable_gravity link_name="upper_arm_link"/>
+  <xacro:gazebo_disable_gravity link_name="lower_arm_link"/>
+  <xacro:gazebo_disable_gravity link_name="wrist_link"/>
+  <xacro:gazebo_disable_gravity link_name="gripper_link"/>
+  <xacro:gazebo_disable_gravity link_name="moving_jaw_so101_v1_link"/>
 
 </robot>
