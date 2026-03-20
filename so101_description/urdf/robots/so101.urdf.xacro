@@ -13,6 +13,15 @@
     <color rgba="0.1 0.1 0.1 1.0"/>
   </material>
   
+  <!-- World link (dummy) to avoid KDL parser inertia warnings on root link -->
+  <link name="world"/>
+  
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
   <!-- Link base -->
   <link name="base_link">
     <inertial>
@@ -344,16 +353,7 @@
     </gazebo>
   </joint>
 
-  <transmission name="gripper_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="gripper">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="motor6">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+
 
   <!-- Joint from wrist to gripper -->
   <joint name="wrist_roll" type="revolute">
@@ -367,16 +367,7 @@
     </gazebo>
   </joint>
 
-  <transmission name="wrist_roll_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="wrist_roll">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="motor5">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+
 
   <!-- Joint from lower_arm to wrist -->
   <joint name="wrist_flex" type="revolute">
@@ -390,16 +381,6 @@
     </gazebo>
   </joint>
 
-  <transmission name="wrist_flex_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="wrist_flex">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="motor4">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
 
   <!-- Joint from upper_arm to lower_arm -->
   <!-- Note: 5-degree calibration offset applied to joint limits -->
@@ -414,16 +395,6 @@
     </gazebo>
   </joint>
 
-  <transmission name="elbow_flex_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="elbow_flex">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="motor3">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
 
   <!-- Joint from shoulder to upper_arm -->
   <joint name="shoulder_lift" type="revolute">
@@ -437,16 +408,6 @@
     </gazebo>
   </joint>
 
-  <transmission name="shoulder_lift_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="shoulder_lift">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="motor2">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
 
   <!-- Joint from base to shoulder -->
   <joint name="shoulder_pan" type="revolute">
@@ -460,16 +421,6 @@
     </gazebo>
   </joint>
 
-  <transmission name="shoulder_pan_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="shoulder_pan">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="motor1">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
 
   <xacro:gazebo_light_blue_material link_name="base_link"/>
   <xacro:gazebo_light_blue_material link_name="shoulder_link"/>
@@ -485,5 +436,65 @@
   <xacro:gazebo_disable_gravity link_name="wrist_link"/>
   <xacro:gazebo_disable_gravity link_name="gripper_link"/>
   <xacro:gazebo_disable_gravity link_name="moving_jaw_so101_v1_link"/>
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <joint name="shoulder_pan">
+      <command_interface name="position">
+        <param name="min">-1.91986</param>
+        <param name="max">1.91986</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="shoulder_lift">
+      <command_interface name="position">
+        <param name="min">-1.74533</param>
+        <param name="max">1.74533</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="elbow_flex">
+      <command_interface name="position">
+        <param name="min">-1.69</param>
+        <param name="max">1.69</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist_flex">
+      <command_interface name="position">
+        <param name="min">-1.65806</param>
+        <param name="max">1.65806</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist_roll">
+      <command_interface name="position">
+        <param name="min">-2.74385</param>
+        <param name="max">2.84121</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="gripper">
+      <command_interface name="position">
+        <param name="min">-0.174533</param>
+        <param name="max">1.74533</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find so101_gazebo)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
 
 </robot>

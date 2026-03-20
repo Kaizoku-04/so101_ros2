@@ -252,6 +252,25 @@ def generate_launch_description():
     ld.add_action(declare_pitch_cmd)
     ld.add_action(declare_yaw_cmd)
 
+    # Spawn controllers
+    spawn_broadcaster_cmd = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster'],
+        condition=IfCondition(use_gazebo))
+        
+    spawn_arm_controller_cmd = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['arm_controller'],
+        condition=IfCondition(use_gazebo))
+        
+    spawn_gripper_controller_cmd = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['gripper_controller'],
+        condition=IfCondition(use_gazebo))
+
     # Add the actions to the launch description
     ld.add_action(set_env_vars_gazebo_models)
     ld.add_action(set_env_vars_robot_description)
@@ -260,5 +279,8 @@ def generate_launch_description():
     ld.add_action(start_gazebo_ros_bridge_cmd)
     ld.add_action(start_gazebo_ros_image_bridge_cmd)
     ld.add_action(start_gazebo_ros_spawner_cmd)
+    ld.add_action(spawn_broadcaster_cmd)
+    ld.add_action(spawn_arm_controller_cmd)
+    ld.add_action(spawn_gripper_controller_cmd)
 
     return ld
